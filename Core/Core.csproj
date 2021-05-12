@@ -193,6 +193,7 @@
     <Compile Include="PoEMemory\Components\Beam.cs" />
     <Compile Include="PoEMemory\Components\BlightTower.cs" />
     <Compile Include="PoEMemory\Components\Buff.cs" />
+    <Compile Include="PoEMemory\Components\Buffs.cs" />
     <Compile Include="PoEMemory\Components\CapturedMonster.cs" />
     <Compile Include="PoEMemory\Components\Charges.cs" />
     <Compile Include="PoEMemory\Components\Chest.cs" />
@@ -252,8 +253,10 @@
     <Compile Include="PoEMemory\Components\WorldItem.cs" />
     <Compile Include="PoEMemory\Element.cs" />
     <Compile Include="PoEMemory\Elements\BanditDialog.cs" />
+    <Compile Include="PoEMemory\Elements\DelveDarknessElement.cs" />
     <Compile Include="PoEMemory\Elements\DelveElement.cs" />
     <Compile Include="PoEMemory\Elements\EntityLabel.cs" />
+    <Compile Include="PoEMemory\Elements\HarvestCraft.cs" />
     <Compile Include="PoEMemory\Elements\HoverItemIcon.cs" />
     <Compile Include="PoEMemory\Elements\HPbarElement.cs" />
     <Compile Include="PoEMemory\Elements\IncursionWindow.cs" />
@@ -274,7 +277,7 @@
     <Compile Include="PoEMemory\Elements\Map.cs" />
     <Compile Include="PoEMemory\Elements\MapStashTabElementQ.cs" />
     <Compile Include="PoEMemory\Elements\NpcDialog.cs" />
-    <Compile Include="PoEMemory\Elements\PoeChatElement.cs" />
+    <Compile Include="PoEMemory\Elements\ChatElement.cs" />
     <Compile Include="PoEMemory\Elements\SkillBarElement.cs" />
     <Compile Include="PoEMemory\Elements\SkillElement.cs" />
     <Compile Include="PoEMemory\Elements\StashElement.cs" />
@@ -336,6 +339,7 @@
     <Compile Include="PoEMemory\MemoryObjects\GameUi.cs" />
     <Compile Include="PoEMemory\MemoryObjects\GemLvlUpPanel.cs" />
     <Compile Include="PoEMemory\MemoryObjects\GrantedEffectsPerLevel.cs" />
+    <Compile Include="PoEMemory\MemoryObjects\HarvestWindow.cs" />
     <Compile Include="PoEMemory\MemoryObjects\Heist\HeistChestRewardTypeRecord.cs" />
     <Compile Include="PoEMemory\MemoryObjects\Heist\HeistJobRecord.cs" />
     <Compile Include="PoEMemory\MemoryObjects\Heist\HeistNpcRecord.cs" />
@@ -491,9 +495,6 @@
     <Compile Include="Shared\Nodes\TextNode.cs" />
     <Compile Include="Shared\Nodes\ToggleNode.cs" />
     <Compile Include="Shared\Nodes\ToggleNodeConverter.cs" />
-    <Compile Include="Shared\PInvoke\ClientID.cs" />
-    <Compile Include="Shared\PInvoke\DynamicImport.cs" />
-    <Compile Include="Shared\PInvoke\ObjectAttributes.cs" />
     <Compile Include="Shared\PluginAutoUpdate\IPluginCompiler.cs" />
     <Compile Include="Shared\PluginAutoUpdate\PluginCompiler.cs" />
     <Compile Include="Shared\PluginAutoUpdate\PluginCopyFiles.cs" />
@@ -506,16 +507,6 @@
     <Compile Include="Shared\PluginManager.cs" />
     <Compile Include="Shared\PluginWrapper.cs" />
     <Compile Include="Shared\Runner.cs" />
-    <Compile Include="Shared\SomeMagic\Imports.cs" />
-    <Compile Include="Shared\SomeMagic\LocalAllocation.cs" />
-    <Compile Include="Shared\SomeMagic\MarshalType.cs" />
-    <Compile Include="Shared\SomeMagic\MemoryBasicInformation.cs" />
-    <Compile Include="Shared\SomeMagic\MemoryLiterate.cs" />
-    <Compile Include="Shared\SomeMagic\MemoryProtection.cs" />
-    <Compile Include="Shared\SomeMagic\NativeMethods.cs" />
-    <Compile Include="Shared\SomeMagic\Pointer.cs" />
-    <Compile Include="Shared\SomeMagic\SafeMemoryHandle.cs" />
-    <Compile Include="Shared\SomeMagic\TypeConverter.cs" />
     <Compile Include="Shared\Static\HudSkin.cs" />
     <Compile Include="Shared\Static\ItemClasses.cs" />
     <Compile Include="Shared\VersionChecker\AutoUpdate.cs" />

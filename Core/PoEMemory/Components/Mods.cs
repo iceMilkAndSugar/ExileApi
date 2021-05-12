@@ -25,54 +25,56 @@ namespace ExileCore.PoEMemory.Components
         public bool Identified => Address != 0 && ModsStruct.Identified;
         public ItemRarity ItemRarity => Address != 0 ? (ItemRarity) ModsStruct.ItemRarity : ItemRarity.Normal;
 
-        public long Hash => ModsStruct.implicitMods.GetHashCode() ^ ModsStruct.explicitMods.GetHashCode() ^
+        public long Hash => ModsStruct.ImplicitModsArray.GetHashCode() ^ ModsStruct.ExplicitModsArray.GetHashCode() ^
                             ModsStruct.GetHashCode();
 
         public int ItemLevel => Address != 0 ? ModsStruct.ItemLevel : 1;
         public int RequiredLevel => Address != 0 ? ModsStruct.RequiredLevel : 1;
         public bool IsUsable => Address != 0 && ModsStruct.IsUsable == 1;
         public bool IsMirrored => Address != 0 && ModsStruct.IsMirrored == 1;
-
-        public int FracturedCount => (int) ModsStruct.GetFracturedStats.Size / ModsComponentOffsets.StatRecordSize;
-        public bool IsFractured => FracturedCount > 0;
-        [Obsolete("Use IsFractured", false)] 
-        public bool HaveFractured => IsFractured;
-
-        [Obsolete("Use FracturedCount", false)]
-        public int CountFractured => FracturedCount;
-
-        public int SynthesizedCount => (int) ModsStruct.GetSynthesizedStats.Size / ModsComponentOffsets.StatRecordSize;
-        public bool IsSynthesized => SynthesizedCount > 0;
-        [Obsolete("Use IsSynthesized", false)] 
-        public bool Synthesised => IsSynthesized;
-
-        public ItemStats ItemStats => new ItemStats(Owner);
-        public List<string> HumanStats => GetStats(ModsStruct.GetStats);
-        public List<string> HumanCraftedStats => GetStats(ModsStruct.GetCraftedStats);
-        public List<string> HumanImpStats => GetStats(ModsStruct.GetImplicitStats);
-        public List<string> FracturedStats => GetStats(ModsStruct.GetFracturedStats);
-
-        private string GetUniqueName(NativePtrArray source)
-        {
-            var words = new List<string>();
-            if (Address == 0) return string.Empty;
-
-            for (var first = source.First + 8; first < source.Last; first += ModsComponentOffsets.NameRecordSize)
-            {
-                words.Add(M.ReadStringU(M.Read<long>(first, ModsComponentOffsets.NameOffset)).Trim());
-            }
-
-            return Cache.StringCache.Read($"{nameof(Mods)}{source.First}", () => string.Join(" ", words.ToArray()));
-        }
+        public bool IsSplit => Address != 0 && ModsStruct.IsSplit == 1;
+        public string IncubatorName => Address != 0 && ModsStruct.IncubatorKey != 0
+            ? M.ReadStringU(M.Read<long>(ModsStruct.IncubatorKey, 0x20)) : null;
 
         public List<ItemMod> ItemMods
         {
             get
             {
-                var implicitMods = GetMods(ModsStruct.implicitMods);
-                var explicitMods = GetMods(ModsStruct.explicitMods);
-                return implicitMods.Concat(explicitMods).ToList();
+                var implicitMods = GetMods(ModsStruct.ImplicitModsArray);
+                var explicitMods = GetMods(ModsStruct.ExplicitModsArray);
+                var enchantMods = GetMods(ModsStruct.EnchantedModsArray);
+                return implicitMods.Concat(explicitMods).Concat(enchantMods).ToList();
             }
+        }
+        public ItemStats ItemStats => new ItemStats(Owner);
+        public List<string> HumanStats => GetStats(ModsStruct.ExplicitStatsArray);
+        public List<string> HumanCraftedStats => GetStats(ModsStruct.CraftedStatsArray);
+        public List<string> HumanImpStats => GetStats(ModsStruct.ImplicitStatsArray);
+        public List<string> HumanFracturedStats => GetStats(ModsStruct.FracturedStatsArray);
+        public List<string> HumanEnchantedStats => GetStats(ModsStruct.EnchantedStatsArray);
+        public int FracturedCount => HumanFracturedStats.Count;
+        public bool IsFractured => FracturedCount > 0;
+        public bool IsSynthesized => ItemMods != null && 
+                                     ItemMods.Take(HumanImpStats.Count).Any(x => x.RawName.StartsWith("SynthesisImplicit"));
+        public int SynthesizedCount => IsSynthesized ? HumanImpStats.Count : 0;
+        public bool IsTalisman => ItemMods != null &&
+                                  ItemMods.Take(HumanImpStats.Count).Any(x => x.RawName.StartsWith("Talisman"));
+        public int TalismanCount => IsTalisman ? HumanImpStats.Count : 0;
+        public int VeiledCount => ItemMods != null ?
+                                  ItemMods.Skip(HumanImpStats.Count).Count(x => x.RawName.StartsWith("Veiled")) : 0;
+        public bool IsVeiled => VeiledCount > 0;
+        
+        private string GetUniqueName(NativePtrArray source)
+        {
+            var words = new List<string>();
+            if (Address == 0) return string.Empty;
+
+            for (var first = source.First; first < source.Last; first += ModsComponentOffsets.NameRecordSize)
+            {
+                words.Add(M.ReadStringU(M.Read<long>(first, ModsComponentOffsets.NameOffset)).Trim());
+            }
+
+            return Cache.StringCache.Read($"{nameof(Mods)}{source.First}", () => string.Join(" ", words.ToArray()));
         }
 
         private List<ItemMod> GetMods(NativePtrArray source)
@@ -104,5 +106,13 @@ namespace ExileCore.PoEMemory.Components
 
             return stats;
         }
+
+        [Obsolete("Use IsFractured", false)]
+        public bool HaveFractured => IsFractured;
+
+        [Obsolete("Use FracturedCount", false)]
+        public int CountFractured => FracturedCount;
+        [Obsolete("Use IsSynthesized", false)]
+        public bool Synthesised => IsSynthesized;
     }
 }

@@ -43,12 +43,12 @@ namespace ExileCore.PoEMemory.MemoryObjects
             _hiddenCheckCache = new LatancyCache<bool>(() =>
             {
                 if (IsValid)
-                    isHidden = HasComponent<Life>() && GetComponent<Life>().HasBuff("hidden_monster");
+                    isHidden = HasComponent<Buffs>() && GetComponent<Buffs>().HasBuff("hidden_monster");
 
                 return isHidden;
             }, 50);
 
-            buffCache = this.ValidCache(() => GetComponent<Life>()?.Buffs);
+            buffCache = this.ValidCache(() => GetComponent<Buffs>()?.BuffsList);
         }
 
         public static Entity Player { get; set; }
@@ -222,7 +222,7 @@ namespace ExileCore.PoEMemory.MemoryObjects
                 if (!IsValid)
                     return _isDead;
 
-                _isDead = !_isAlive;
+                _isDead = !IsAlive;
                 return _isDead;
             }
         }
@@ -355,20 +355,11 @@ namespace ExileCore.PoEMemory.MemoryObjects
         {
             get
             {
-                if (_metadata == null)
-                {
-                    if (Path != null)
-                    {
-                        var splitIndex = Path.IndexOf("@", StringComparison.Ordinal);
+                if (_metadata != null || Path == null) return _metadata;
 
-                        if (splitIndex != -1)
-                            _metadata = Path.Substring(0, splitIndex);
-                        else
-                            return Path;
-                    }
-                }
+                var splitIndex = Path.IndexOf("@", StringComparison.Ordinal);
 
-                return _metadata;
+                return splitIndex != -1 ? _metadata = Path.Substring(0, splitIndex) : Path;
             }
         }
 
@@ -383,8 +374,8 @@ namespace ExileCore.PoEMemory.MemoryObjects
             }
         }
 
-        public uint Id => (uint) (_id = _id ?? M.Read<uint>(Address + 0x58));
-        public uint InventoryId => (uint) (_inventoryId = _inventoryId ?? M.Read<uint>(Address + 0x68));
+        public uint Id => (uint) (_id = _id ?? M.Read<uint>(Address + 0x60));
+        public uint InventoryId => (uint) (_inventoryId = _inventoryId ?? M.Read<uint>(Address + 0x70));
 
         //public bool IsValid => M.Read<int>(EntityOffsets.Head.MainObject+0x18,0) == 0x65004D;
         public Dictionary<string, long> CacheComp => _cacheComponents2 ?? (_cacheComponents2 = GetComponents());
@@ -425,26 +416,22 @@ namespace ExileCore.PoEMemory.MemoryObjects
 
         public bool Check(uint entityId)
         {
-            if (_id != null)
+            if (_id != null && _id != entityId)
             {
-                if (_id != entityId)
-                {
-                    DebugWindow.LogMsg($"Was ID: {Id} New ID: {entityId} To Path: {Path}", 3);
-                    _id = entityId;
-                    _path = null;
-                    _metadata = null;
-                    Type = ParseType();
-                }
+                DebugWindow.LogMsg($"Was ID: {Id} New ID: {entityId} To Path: {Path}", 3);
+                _id = entityId;
+                _path = null;
+                _metadata = null;
+                Type = ParseType();
             }
 
-            if (Type != EntityType.Error)
+            return Type switch
             {
-                if (Type == EntityType.Effect || Type == EntityType.Daemon) return true;
-
-                return CacheComp != null && Id == entityId && CheckRarity();
-            }
-
-            return false;
+                EntityType.Error => false,
+                EntityType.Effect => true,
+                EntityType.Daemon => true,
+                _ => CacheComp != null && Id == entityId && CheckRarity()
+            };
         }
 
         private bool CheckRarity()
@@ -630,15 +617,9 @@ namespace ExileCore.PoEMemory.MemoryObjects
         {
             var c = GetComponent<T>();
 
-            if (c.OwnerAddress != Address)
-            {
-                var componentFromMemory = GetComponentFromMemory<T>();
-                if (componentFromMemory.OwnerAddress == Address) return true;
-
-                return false;
-            }
-
-            return true;
+            if (c.OwnerAddress == Address) return true;
+            var componentFromMemory = GetComponentFromMemory<T>();
+            return componentFromMemory.OwnerAddress == Address;
         }
 
         public T GetComponentFromMemory<T>() where T : Component, new()
